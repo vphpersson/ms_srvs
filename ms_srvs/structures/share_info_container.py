@@ -44,7 +44,7 @@ class ShareInfo1Container(ShareInfoContainer):
         offset = 4
         entry_share_type_list: List[int] = []
         for i in range(entries_read):
-            entry_share_type_list.append(struct_unpack('>I', pointer_data[offset + 4:offset + 8])[0])
+            entry_share_type_list.append(struct_unpack('<I', pointer_data[offset + 4:offset + 8])[0])
             offset += 12
 
         entries: List[ShareInfo1] = []
