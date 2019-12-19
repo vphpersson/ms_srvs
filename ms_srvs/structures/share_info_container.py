@@ -88,9 +88,5 @@ class ShareInfo1Container(ShareInfoContainer):
 
         return b''.join([
             struct_pack('<I', self.entries_read),
-            bytes(
-                Pointer(
-                    representation=b''.join([fixed_part, variable_part]) or b'\x00\x00\x00\x00'
-                )
-            )
+            b''.join([fixed_part, variable_part]) or b'\x00\x00\x00\x00'
         ])
