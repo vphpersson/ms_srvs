@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from typing import Tuple, ClassVar, List, Dict, Type
+from typing import Tuple, ClassVar, List, Dict, Type, Any
 from struct import pack as struct_pack, unpack as struct_unpack
 
 from rpc.ndr import NDRType, Pointer, ConformantVaryingString
@@ -20,8 +20,11 @@ class ShareInfoContainer(NDRType, ABC):
     level_to_class: ClassVar[Dict[int, Type[ShareInfoContainer]]] = {}
 
     @classmethod
-    def from_level_and_bytes(cls, level: int, data: bytes) -> Tuple[ShareInfoContainer, int]:
+    def from_level_and_params(cls, level: int, **params: Dict[str, Any]) -> ShareInfoContainer:
+        return cls.level_to_class[level](**params)
 
+    @classmethod
+    def from_level_and_bytes(cls, level: int, data: bytes) -> Tuple[ShareInfoContainer, int]:
         if cls != ShareInfoContainer:
             if level != cls.level:
                 # TODO: Use proper exception.
