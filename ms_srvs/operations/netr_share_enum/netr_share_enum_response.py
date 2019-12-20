@@ -2,13 +2,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from struct import unpack as struct_unpack
 
+from ms_srvs.operations.netr_share_enum import NetrShareEnumMessage
 from ms_srvs.structures.share_enum_struct import ShareEnumStruct
 
 from rpc.ndr import Pointer
 
 
 @dataclass
-class NetrShareEnumResponse:
+class NetrShareEnumResponse(NetrShareEnumMessage):
     info_struct: ShareEnumStruct
     total_entries: int
     resume_handle: bytes
