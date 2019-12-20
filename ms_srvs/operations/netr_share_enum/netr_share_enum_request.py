@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 from struct import pack as struct_pack
 
+from ms_srvs.operations.netr_share_enum import NetrShareEnumMessage
 from ms_srvs.structures.share_enum_struct import ShareEnumStruct
 from ms_srvs.structures.share_info_container import ShareInfoContainer
 
@@ -10,7 +11,7 @@ from rpc.ndr import Pointer, ConformantVaryingString
 
 
 @dataclass
-class NetrShareEnumRequest:
+class NetrShareEnumRequest(NetrShareEnumMessage):
     level: int
     preferred_maximum_length: int = -1
     server_name: Optional[str] = None
