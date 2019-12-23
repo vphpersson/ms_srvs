@@ -3,11 +3,11 @@ from dataclasses import dataclass
 from typing import Optional
 from struct import pack as struct_pack
 
-from ms_srvs.operations.netr_share_enum import NetrShareEnumMessage
+from rpc.ndr import Pointer, ConformantVaryingString
+
+from ms_srvs.operations.netr_share_enum.netr_share_enum_base import NetrShareEnumMessage
 from ms_srvs.structures.share_enum_struct import ShareEnumStruct
 from ms_srvs.structures.share_info_container import ShareInfoContainer
-
-from rpc.ndr import Pointer, ConformantVaryingString
 
 
 @dataclass
