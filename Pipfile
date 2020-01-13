@@ -8,6 +8,7 @@ pytest = "*"
 coverage = "*"
 
 [packages]
+rpc = {file = "http://github.com/vphpersson/rpc/tarball/master"}
 msdsalgs = {file = "https://github.com/vphpersson/msdsalgs/tarball/master"}
 
 [requires]
