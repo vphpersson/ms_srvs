@@ -8,7 +8,7 @@ pytest = "*"
 coverage = "*"
 
 [packages]
-rpc = {git = "https://github.com/vphpersson/rpc"}
+# rpc = {git = "https://github.com/vphpersson/rpc"}
 
 [requires]
 python_version = "3.8"
