@@ -8,7 +8,7 @@ pytest = "*"
 coverage = "*"
 
 [packages]
-# rpc = {git = "https://github.com/vphpersson/rpc"}
+msdsalgs = {file = "https://github.com/vphpersson/msdsalgs/tarball/master"}
 
 [requires]
 python_version = "3.8"
