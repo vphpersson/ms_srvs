@@ -1,4 +1,6 @@
-from ms_srvs.operations.netr_share_enum.netr_share_enum_response import NetrShareEnumResponse
+from msdsalgs.win32_error import Win32ErrorCode
+
+from ms_srvs.operations.netr_share_enum import NetrShareEnumResponse
 from ms_srvs.structures.share_enum_struct import ShareEnumStruct
 
 
@@ -15,8 +17,8 @@ class TestResponseDeserialization1:
     def test_resume_handle(self):
         assert self.response.resume_handle == b'\x00\x00\x00\x00'
 
-    def test_return_value(self):
-        assert self.response.return_value == b'\x00\x00\x00\x00'
+    def test_return_code(self):
+        assert self.response.return_code is Win32ErrorCode.ERROR_SUCCESS
 
     def test_info_struct_type(self):
         assert isinstance(self.response.info_struct, ShareEnumStruct)
