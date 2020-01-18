@@ -4,34 +4,39 @@ from abc import ABC, abstractmethod
 from typing import Tuple, ClassVar, List, Dict, Type, Any
 from struct import pack as struct_pack, unpack as struct_unpack
 
-from rpc.ndr import NDRType, Pointer, ConformantVaryingString
+from ndr.structures.pointer import Pointer
+from ndr.structures.conformant_varying_string import ConformantVaryingString
+from ndr.structures import NDRType
+from ndr.utils import pad as ndr_pad, calculate_pad_length
+
+from ms_srvs.structures.share_type import ShareType
 
 
 @dataclass
 class ShareInfo1:
-    shi1_netname: str
-    shi1_type: int
-    shi1_remark: str
+    netname: str
+    share_type: ShareType
+    remark: str
 
 
 @dataclass
 class ShareInfoContainer(NDRType, ABC):
-    level: ClassVar[int] = NotImplemented
-    level_to_class: ClassVar[Dict[int, Type[ShareInfoContainer]]] = {}
+    LEVEL: ClassVar[int] = NotImplemented
+    LEVEL_TO_CLASS: ClassVar[Dict[int, Type[ShareInfoContainer]]] = {}
 
     @classmethod
     def from_level_and_params(cls, level: int, **params: Dict[str, Any]) -> ShareInfoContainer:
-        return cls.level_to_class[level](**params)
+        return cls.LEVEL_TO_CLASS[level](**params)
 
     @classmethod
     def from_level_and_bytes(cls, level: int, data: bytes) -> Tuple[ShareInfoContainer, int]:
         if cls != ShareInfoContainer:
-            if level != cls.level:
+            if level != cls.LEVEL:
                 # TODO: Use proper exception.
                 raise ValueError
             return cls.from_bytes(data=data)
         else:
-            return cls.level_to_class[level].from_bytes(data=data)
+            return cls.LEVEL_TO_CLASS[level].from_bytes(data=data)
 
     @classmethod
     @abstractmethod
@@ -41,7 +46,7 @@ class ShareInfoContainer(NDRType, ABC):
 
 @dataclass
 class ShareInfo1Container(ShareInfoContainer):
-    level: ClassVar[int] = 1
+    LEVEL: ClassVar[int] = 1
 
     entries: Tuple[ShareInfo1, ...] = field(default_factory=tuple)
 
@@ -56,23 +61,25 @@ class ShareInfo1Container(ShareInfoContainer):
         max_count = struct_unpack('<I', pointer_data[:4])
 
         offset = 4
-        entry_share_type_list: List[int] = []
-        for i in range(entries_read):
-            entry_share_type_list.append(struct_unpack('<I', pointer_data[offset + 4:offset + 8])[0])
+        entry_share_type_list: List[ShareType] = []
+        for _ in range(entries_read):
+            entry_share_type_list.append(
+                ShareType.from_int(struct_unpack('<I', pointer_data[offset+4:offset+8])[0])
+            )
             offset += 12
 
         entries: List[ShareInfo1] = []
         for i in range(entries_read):
             netname_cvs = ConformantVaryingString.from_bytes(data=pointer_data[offset:])
-            offset += len(netname_cvs) + (4 - (len(netname_cvs) % 4)) % 4
+            offset += calculate_pad_length(len(netname_cvs))
             remark_cvs = ConformantVaryingString.from_bytes(pointer_data[offset:])
-            offset += len(remark_cvs) + (4 - (len(remark_cvs) % 4)) % 4
+            offset += calculate_pad_length(len(remark_cvs))
 
             entries.append(
                 ShareInfo1(
-                    shi1_netname=netname_cvs.representation,
-                    shi1_type=entry_share_type_list[i],
-                    shi1_remark=remark_cvs.representation
+                    netname=netname_cvs.representation,
+                    share_type=entry_share_type_list[i],
+                    remark=remark_cvs.representation
                 )
             )
 
@@ -82,22 +89,18 @@ class ShareInfo1Container(ShareInfoContainer):
         fixed_part: bytes = b''
         variable_part: bytes = b''
         for entry in self.entries:
-            netname_pointer = Pointer(representation=ConformantVaryingString(representation=entry.shi1_netname))
-            share_type = entry.shi1_type
-            remark_pointer = Pointer(representation=ConformantVaryingString(representation=entry.shi1_remark))
+            netname_pointer = Pointer(representation=ConformantVaryingString(representation=entry.netname))
+            remark_pointer = Pointer(representation=ConformantVaryingString(representation=entry.remark))
 
             fixed_part += b''.join([
                 struct_pack('<I', netname_pointer.referent_id),
-                struct_pack('<I', share_type),
+                struct_pack('<I', int(entry.share_type)),
                 struct_pack('<I', remark_pointer.referent_id)
             ])
 
-            netname_bytes: bytes = bytes(netname_pointer.representation)
-            remark_bytes: bytes = bytes(remark_pointer.representation)
-
             variable_part += b''.join([
-                netname_bytes + b'\x00' * (4 - (len(netname_bytes) % 4)) % 4,
-                remark_bytes + b'\x00' * (4 - (len(remark_bytes) % 4)) % 4
+                ndr_pad(bytes(netname_pointer.representation)),
+                ndr_pad(bytes(remark_pointer.representation))
             ])
 
         return b''.join([
@@ -106,6 +109,6 @@ class ShareInfo1Container(ShareInfoContainer):
         ])
 
 
-ShareInfoContainer.level_to_class = {
+ShareInfoContainer.LEVEL_TO_CLASS = {
     1: ShareInfo1Container
 }

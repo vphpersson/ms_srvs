@@ -4,10 +4,11 @@ from typing import Optional, ClassVar
 from struct import pack as struct_pack, unpack as struct_unpack
 
 from rpc.connection import Connection as RPCConnection
-from rpc.ndr import Pointer, ConformantVaryingString
 from rpc.utils.client_protocol_message import ClientProtocolRequestBase, ClientProtocolResponseBase, obtain_response, \
     Win32ErrorCode
-from rpc.utils.ndr import pad as ndr_pad
+from ndr.structures.pointer import Pointer, NullPointer
+from ndr.structures.conformant_varying_string import ConformantVaryingString
+from ndr.utils import pad as ndr_pad
 
 from ms_srvs.operations import Operation
 from ms_srvs.structures.share_enum_struct import ShareEnumStruct
@@ -37,7 +38,7 @@ class NetrShareEnumRequest(ClientProtocolRequestBase):
             ndr_pad(server_name_bytes),
             bytes(ShareEnumStruct(share_info=ShareInfoContainer.from_level_and_params(level=self.level))),
             struct_pack('<i', self.preferred_maximum_length),
-            bytes(Pointer(representation=self.resume_handle or b'\x00\x00\x00\x00'))
+            bytes(Pointer(representation=self.resume_handle) if self.resume_handle else NullPointer())
         ])
 
 
@@ -81,8 +82,9 @@ async def netr_share_enum(
     rpc_connection: RPCConnection,
     request: NetrShareEnumRequest,
     raise_exception: bool = True
-) -> NetrShareEnumRequest:
+) -> NetrShareEnumResponse:
     """
+    Perform the NetrShareEnum operation.
 
     :param rpc_connection:
     :param request:
