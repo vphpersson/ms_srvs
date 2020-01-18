@@ -1,4 +1,4 @@
-from ms_srvs.structures.share_info_container import ShareInfo1Container
+from ms_srvs.structures.share_info_container import ShareInfo1Container, ShareInfo1, ShareType
 
 
 class TestShareInfo1ContainerDeseralization:
@@ -10,28 +10,39 @@ class TestShareInfo1ContainerDeseralization:
         assert self.num_bytes == 352
 
     def test_level(self):
-        assert self.container.level == 1
+        assert self.container.LEVEL == 1
 
     def test_entries_read(self):
         assert self.container.entries_read == 5
 
     def test_entries(self):
-        assert self.container.entries[0].shi1_netname == 'ADMIN$'
-        assert self.container.entries[0].shi1_type == 0x80000000
-        assert self.container.entries[0].shi1_remark == 'Remote Admin'
 
-        assert self.container.entries[1].shi1_netname == 'C$'
-        assert self.container.entries[1].shi1_type == 0x80000000
-        assert self.container.entries[1].shi1_remark == 'Default share'
+        assert self.container.entries[0] == ShareInfo1(
+            netname='ADMIN$',
+            share_type=ShareType(disktree=True, special=True),
+            remark='Remote Admin'
+        )
 
-        assert self.container.entries[2].shi1_netname == 'cool_share'
-        assert self.container.entries[2].shi1_type == 0x00000000
-        assert self.container.entries[2].shi1_remark == ''
+        assert self.container.entries[1] == ShareInfo1(
+            netname='C$',
+            share_type=ShareType(disktree=True, special=True),
+            remark='Default share'
+        )
 
-        assert self.container.entries[3].shi1_netname == 'IPC$'
-        assert self.container.entries[3].shi1_type == 0x80000003
-        assert self.container.entries[3].shi1_remark == 'Remote IPC'
+        assert self.container.entries[2] == ShareInfo1(
+            netname='cool_share',
+            share_type=ShareType(disktree=True),
+            remark=''
+        )
 
-        assert self.container.entries[4].shi1_netname == 'Users'
-        assert self.container.entries[4].shi1_type == 0x00000000
-        assert self.container.entries[4].shi1_remark == ''
+        assert self.container.entries[3] == ShareInfo1(
+            netname='IPC$',
+            share_type=ShareType(ipc=True, special=True),
+            remark='Remote IPC'
+        )
+
+        assert self.container.entries[4] == ShareInfo1(
+            netname='Users',
+            share_type=ShareType(disktree=True),
+            remark=''
+        )

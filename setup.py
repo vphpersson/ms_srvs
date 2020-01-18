@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'rpc @ http://github.com/vphpersson/rpc/tarball/master',
-        'msdsalgs @ https://github.com/vphpersson/msdsalgs/tarball/master'
+        'msdsalgs @ https://github.com/vphpersson/msdsalgs/tarball/master',
+        'ndr @ https://github.com/vphpersson/ndr/tarball/master'
     ]
 )

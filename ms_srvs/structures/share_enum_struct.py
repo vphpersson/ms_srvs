@@ -16,7 +16,7 @@ class ShareEnumStruct(NDRType):
 
     @property
     def level(self) -> int:
-        return self.share_info.level
+        return self.share_info.LEVEL
 
     @classmethod
     def from_bytes(cls, data: bytes) -> Tuple[ShareEnumStruct, int]:

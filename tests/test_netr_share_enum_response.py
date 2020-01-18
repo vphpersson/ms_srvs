@@ -15,7 +15,7 @@ class TestResponseDeserialization1:
         assert self.response.total_entries == 5
 
     def test_resume_handle(self):
-        assert self.response.resume_handle == b'\x00\x00\x00\x00'
+        assert self.response.resume_handle == bytes(4)
 
     def test_return_code(self):
         assert self.response.return_code is Win32ErrorCode.ERROR_SUCCESS
