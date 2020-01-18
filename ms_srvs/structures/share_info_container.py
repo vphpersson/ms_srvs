@@ -58,7 +58,7 @@ class ShareInfo1Container(ShareInfoContainer):
     def from_bytes(cls, data: bytes) -> Tuple[ShareInfo1Container, int]:
         entries_read: int = struct_unpack('<I', data[:4])[0]
         pointer_data = Pointer.from_bytes(data[4:]).representation
-        max_count = struct_unpack('<I', pointer_data[:4])
+        max_count = struct_unpack('<I', pointer_data[:4])[0]
 
         offset = 4
         entry_share_type_list: List[ShareType] = []
